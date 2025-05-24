@@ -33,7 +33,7 @@ export default function HRPage() {
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg bg-white overflow-y-auto max-h-[80vh]">
-            <DialogTitle>Add HR</DialogTitle>
+            
             <HrForm />
           </DialogContent>
         </Dialog>

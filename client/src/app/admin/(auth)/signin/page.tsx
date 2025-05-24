@@ -18,24 +18,15 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import axios from "@/utils/axios";
-
-// Form schema
-const formSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  password: z.string().min(8, {
-    message: "Password must be at least 8 characters.",
-  }),
-});
+import { SigninInput, signinSchema } from "@/utils/schema";
 
 export default function SignInPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form definition
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<SigninInput>({
+    resolver: zodResolver(signinSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -43,13 +34,10 @@ export default function SignInPage() {
   });
 
   // Form submit handler
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: SigninInput) {
     setIsSubmitting(true);
     try {
-      const response = await axios.post(
-        `/api/v1/auth/admin/signin`,
-        values
-      );
+      const response = await axios.post(`/api/v1/auth/admin/signin`, values);
 
       if (response.status === 200) {
         toast.success("Signed in successfully!");
@@ -73,13 +61,10 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-sm border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center  px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 p-10 rounded-xl shadow-sm border border-gray-100">
         <div className="text-center">
-
-          <h2 className="mt-6 text-2xl font-bold text-gray-900">
-            Sign In to Your Account
-          </h2>
+          <h2 className="mt-6 text-2xl font-bold">Sign In to Your Account</h2>
           <p className="mt-2 text-sm text-gray-600">
             Enter your credentials to access your admin dashboard
           </p>
@@ -133,15 +118,6 @@ export default function SignInPage() {
                 )}
               />
             </div>
-
-            {/* <div className="flex items-center justify-end">
-              <Link
-                href="/forgot-password"
-                className="text-sm font-medium text-gray-900 hover:underline"
-              >
-                Forgot password?
-              </Link>
-            </div> */}
 
             <div className="pt-2">
               <Button

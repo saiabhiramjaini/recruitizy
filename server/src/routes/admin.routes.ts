@@ -5,6 +5,7 @@ import {
   getAllHrs,
   getCompanyDetails,
   getJobPostings,
+  getStats,
 } from "../controllers/admin.controllers";
 import { adminAuthMiddleware } from "../middlewares/adminAuth.middleware";
 
@@ -19,5 +20,6 @@ adminRouter.get(
 );
 adminRouter.get("/hr", adminAuthMiddleware as any, getAllHrs as any);
 adminRouter.get("/job-postings", adminAuthMiddleware as any, getJobPostings as any);
+adminRouter.get("/stats", adminAuthMiddleware as any, getStats as any);
 
 export default adminRouter;

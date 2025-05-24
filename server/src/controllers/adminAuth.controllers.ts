@@ -20,7 +20,7 @@ export const signup = async (req: Request, res: Response) => {
     );
 
     if (password !== cPassword) {
-      return res.json({ msg: "Passwords do not match" });
+      return res.status(400).json({ msg: "Passwords do not match" });
     }
 
     const admin = await prisma.admin.findFirst({
@@ -29,7 +29,7 @@ export const signup = async (req: Request, res: Response) => {
       },
     });
     if (admin) {
-      return res.json({ msg: "An Admin with this email already exists" });
+      return res.status(409).json({ msg: "An Admin with this email already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -50,10 +50,10 @@ export const signup = async (req: Request, res: Response) => {
   } catch (error: any) {
     if (error.errors && error.errors[0].message) {
       const message = error.errors[0].message;
-      return res.json({ msg: message });
+      return res.status(400).json({ msg: message });
     }
     console.error(error);
-    return res.json({ msg: "Internal Server Error" });
+    return res.status(500).json({ msg: "Internal Server Error" });
   }
 };
 
@@ -68,24 +68,24 @@ export const signin = async (req: Request, res: Response) => {
     });
 
     if (!admin) {
-      return res.json({ msg: "Email doesn't exist" });
+      return res.status(404).json({ msg: "Email doesn't exist" });
     }
 
     const passwordMatch = await bcrypt.compare(password, admin.password);
     if (!passwordMatch) {
-      return res.json({ msg: "Invalid Credentials" });
+      return res.status(401).json({ msg: "Invalid Credentials" });
     }
 
     const token = jwt.sign({ adminId: admin.id }, process.env.JWT_SECRET!);
     res.cookie("token", token, { httpOnly: true });
-    return res.json({ msg: "Signin successful", token });
+    return res.status(200).json({ msg: "Signin successful", token });
   } catch (error: any) {
     if (error.errors && error.errors[0].message) {
       const message = error.errors[0].message;
-      return res.json({ msg: message });
+      return res.status(400).json({ msg: message });
     }
     console.error(error);
-    return res.json({ msg: "Internal Server Error" });
+    return res.status(500).json({ msg: "Internal Server Error" });
   }
 };
 
@@ -100,7 +100,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     });
 
     if (!existingUser) {
-      return res.json({ msg: "User not found" });
+      return res.status(404).json({ msg: "User not found" });
     }
 
     const token = jwt.sign(
@@ -114,18 +114,18 @@ export const forgotPassword = async (req: Request, res: Response) => {
     const emailResult = await sendEmail(email, "Reset password", text);
 
     if (emailResult.success) {
-      return res.json({ msg: "Email sent successfully" });
+      return res.status(200).json({ msg: "Email sent successfully" });
     } else {
-      return res.json({ msg: emailResult.error });
+      return res.status(500).json({ msg: emailResult.error });
     }
   } catch (error: any) {
     if (error.errors && error.errors[0].message) {
       const message = error.errors[0].message;
-      return res.json({ msg: message });
+      return res.status(400).json({ msg: message });
     }
 
     console.error(error);
-    return res.json({ msg: "Internal Server Error" });
+    return res.status(500).json({ msg: "Internal Server Error" });
   }
 };
 
@@ -138,7 +138,7 @@ export const profile = async (
     if (!admin) {
       return res.status(401).json({ msg: "Unauthorized" });
     }
-    return res.json({ username: admin.username, email: admin.email });
+    return res.status(200).json({ username: admin.username, email: admin.email });
   } catch (error) {
     console.error("Error fetching admin profile:", error);
     res.status(500).json({ msg: "Server error" });
@@ -158,7 +158,7 @@ export const resetPassword = async (
     }
 
     if (password !== cPassword) {
-      return res.json({ msg: "Passwords do not match" });
+      return res.status(400).json({ msg: "Passwords do not match" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -171,17 +171,17 @@ export const resetPassword = async (
       where: { id: admin.id },
     });
 
-    return res.json({
+    return res.status(200).json({
       msg: "Password updated successfully",
       admin: updatedUser,
     });
   } catch (error: any) {
     if (error.errors && error.errors[0].message) {
       const message = error.errors[0].message;
-      return res.json({ msg: message });
+      return res.status(400).json({ msg: message });
     }
     console.error(error);
-    return res.json({ msg: "Internal Server Error" });
+    return res.status(500).json({ msg: "Internal Server Error" });
   }
 };
 

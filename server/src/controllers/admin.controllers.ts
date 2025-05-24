@@ -202,8 +202,6 @@ export const addHr = async (req: AuthenticatedAdminRequest, res: Response) => {
     Email: ${email}
     Password: ${password}
 
-    Please log in and change your password after your first login.
-
     Regards,
     Admin Team`;
 
@@ -333,5 +331,104 @@ export const getJobPostings = async (
     return res.status(500).json({ msg: "Internal Server Error" });
   } finally {
     await prisma.$disconnect();
+  }
+};
+
+export const getStats = async (
+  req: AuthenticatedAdminRequest,
+  res: Response
+) => {
+  try {
+    const { admin } = req;
+    if (!admin || !admin.companyId) {
+      return res.status(401).json({ msg: "Unauthorized" });
+    }
+
+    // Fetch stats for the admin's company
+    const [companyStats, recentJobs, recentCandidates] = await Promise.all([
+      prisma.company.findUnique({
+        where: { id: admin.companyId },
+        select: {
+          _count: {
+            select: {
+              hrs: true,
+              Job: true,
+            },
+          },
+          Job: {
+            select: {
+              _count: {
+                select: {
+                  candidates: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      prisma.job.findMany({
+        where: { companyId: admin.companyId },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          status: true,
+          createdAt: true,
+          _count: {
+            select: {
+              candidates: true,
+            },
+          },
+        },
+      }),
+      prisma.candidate.findMany({
+        where: {
+          job: {
+            companyId: admin.companyId,
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          status: true,
+          createdAt: true,
+          job: {
+            select: {
+              title: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    if (!companyStats) {
+      return res.status(404).json({ msg: "Company not found" });
+    }
+
+    // Calculate total candidates across all jobs
+    const totalCandidates = companyStats.Job.reduce(
+      (sum, job) => sum + job._count.candidates,
+      0
+    );
+
+    return res.status(200).json({
+      msg: "Stats fetched successfully",
+      stats: {
+        hrs: companyStats._count.hrs,
+        jobs: companyStats._count.Job,
+        candidates: totalCandidates,
+      },
+      recentJobs,
+      recentCandidates,
+    });
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+    return res.status(500).json({ msg: "Internal Server Error" });
   }
 };

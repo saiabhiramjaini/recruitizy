@@ -23,12 +23,12 @@ export function HrTable() {
       try {
         const response = await axios.get("/api/v1/admin/hr");
 
-        if (response.status !== 200) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (response.status === 200) {
+          const data = response.data;
+          setHrs(data.hrs || []);
+        } else {
+          setError("No HR accounts found");
         }
-
-        const data = response.data;
-        setHrs(data.hrs || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch HRs");
       } finally {

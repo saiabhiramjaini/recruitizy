@@ -18,35 +18,17 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import axios from "@/utils/axios";
+import { SignupInput, signupSchema } from "@/utils/schema";
 
-// Form schema
-const formSchema = z
-  .object({
-    username: z.string().min(3, {
-      message: "Username must be at least 3 characters.",
-    }),
-    email: z.string().email({
-      message: "Please enter a valid email address.",
-    }),
-    password: z.string().min(8, {
-      message: "Password must be at least 8 characters.",
-    }),
-    cPassword: z.string().min(8, {
-      message: "Confirm password must be at least 8 characters.",
-    }),
-  })
-  .refine((data) => data.password === data.cPassword, {
-    message: "Passwords don't match",
-    path: ["cPassword"],
-  });
+
 
 export default function SignUpPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form definition
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<SignupInput>({
+    resolver: zodResolver(signupSchema),
     defaultValues: {
       username: "",
       email: "",
@@ -56,7 +38,7 @@ export default function SignUpPage() {
   });
 
   // Form submit handler
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: SignupInput) {
     setIsSubmitting(true);
     try {
       const response = await axios.post(
@@ -87,8 +69,8 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-sm border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center  px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8  p-10 rounded-xl shadow-sm border ">
         <div className="text-center">
          
           <h2 className="mt-6 text-2xl font-bold text-gray-900">
@@ -110,7 +92,7 @@ export default function SignUpPage() {
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
+                    <FormLabel className="text-sm font-medium ">
                       Username
                     </FormLabel>
                     <FormControl>
@@ -130,7 +112,7 @@ export default function SignUpPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
+                    <FormLabel className="text-sm font-medium ">
                       Email
                     </FormLabel>
                     <FormControl>
@@ -151,7 +133,7 @@ export default function SignUpPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
+                    <FormLabel className="text-sm font-medium ">
                       Password
                     </FormLabel>
                     <FormControl>
@@ -172,7 +154,7 @@ export default function SignUpPage() {
                 name="cPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
+                    <FormLabel className="text-sm font-medium ">
                       Confirm Password
                     </FormLabel>
                     <FormControl>
@@ -202,7 +184,7 @@ export default function SignUpPage() {
         </Form>
 
         <div className="text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm ">
             Already have an account?{" "}
             <Link
               href="/admin/signin"

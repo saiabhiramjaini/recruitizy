@@ -12,7 +12,7 @@ import { LogOut, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-export function Header() {
+export function HrHeader() {
   const router = useRouter();
 
   const handleLogout = async () => {

@@ -32,7 +32,7 @@ export default function JobsPage() {
         </Dialog>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {/* Job cards will be added here */}
+        
       </div>
     </div>
   );

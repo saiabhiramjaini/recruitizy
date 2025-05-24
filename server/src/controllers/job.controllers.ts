@@ -32,7 +32,6 @@ export const createJob = async (req: AuthenticatedHRRequest, res: Response) => {
         ...jobData,
         companyId: hr.companyId,
         hrId: hr.id,
-        // perks: jobData.perks || [], // Ensure perks is an array
         deadline: jobData.deadline || null,
         status: jobData.status || "Open",
       },

@@ -1,13 +1,13 @@
 import { ReactNode } from "react";
-import { Sidebar } from "@/components/hr/Sidebar";
-import { Header } from "@/components/hr/Header";
+import { HrSidebar } from "@/components/hr/HrSidebar";
+import { HrHeader } from "@/components/hr/HrHeader";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-[#F7F8F5]">
-      <Header />
+      <HrHeader />
       <div className="flex">
-        <Sidebar />
+        <HrSidebar />
         <main className="flex-1 p-6">{children}</main>
       </div>
     </div>

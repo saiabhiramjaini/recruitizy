@@ -29,11 +29,11 @@ const routes = [
   },
 ];
 
-export function Sidebar() {
+export function HrSidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] w-64 flex-col border-r border-[#EAF0DD] bg-white">
+    <div className="flex h-[calc(100vh-4rem)] w-64 flex-col border-r ">
       <div className="flex flex-col gap-2 p-4">
         {routes.map((route) => (
           <Link key={route.href} href={route.href}>

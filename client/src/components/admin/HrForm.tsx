@@ -16,29 +16,23 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import axios from "@/utils/axios";
-
-// HR Form Schema
-const hrFormSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  email: z.string().email("Invalid email format"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type HrFormValues = z.infer<typeof hrFormSchema>;
+import { Sign } from "crypto";
+import { SignupInput, signupSchema } from "@/utils/schema";
 
 export function HrForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<HrFormValues>({
-    resolver: zodResolver(hrFormSchema),
+  const form = useForm<SignupInput>({
+    resolver: zodResolver(signupSchema),
     defaultValues: {
       username: "",
       email: "",
       password: "",
+      cPassword: "",
     },
   });
 
-  const onSubmit = async (values: HrFormValues) => {
+  const onSubmit = async (values: SignupInput) => {
     setIsSubmitting(true);
     try {
       const response = await axios.post<{ msg: string; hr: any }>(
@@ -67,16 +61,20 @@ export function HrForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-6">
         <div className="space-y-4">
           <FormField
             control={form.control}
             name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium text-gray-700">Username</FormLabel>
+                <FormLabel className="text-sm font-medium ">Username</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter username" {...field} className="rounded-lg" />
+                  <Input
+                    placeholder="Enter username"
+                    {...field}
+                    className="rounded-lg"
+                  />
                 </FormControl>
                 <FormMessage className="text-xs" />
               </FormItem>
@@ -88,9 +86,14 @@ export function HrForm() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium text-gray-700">Email</FormLabel>
+                <FormLabel className="text-sm font-medium ">Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="Enter email" {...field} className="rounded-lg" />
+                  <Input
+                    type="email"
+                    placeholder="Enter email"
+                    {...field}
+                    className="rounded-lg"
+                  />
                 </FormControl>
                 <FormMessage className="text-xs" />
               </FormItem>
@@ -102,9 +105,35 @@ export function HrForm() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium text-gray-700">Password</FormLabel>
+                <FormLabel className="text-sm font-medium ">Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="Enter password" {...field} className="rounded-lg" />
+                  <Input
+                    type="password"
+                    placeholder="Enter password"
+                    {...field}
+                    className="rounded-lg"
+                  />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="cPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium ">
+                  Confirm Password
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Confirm password"
+                    {...field}
+                    className="rounded-lg"
+                  />
                 </FormControl>
                 <FormMessage className="text-xs" />
               </FormItem>
@@ -112,13 +141,15 @@ export function HrForm() {
           />
         </div>
 
-        <Button
-          type="submit"
-          className="w-full rounded-lg py-3 text-sm font-medium"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Adding HR..." : "Add HR"}
-        </Button>
+        <div className="pt-2">
+          <Button
+            type="submit"
+            className="w-full rounded-lg py-3 text-sm font-medium"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Creating account..." : "Create Account"}
+          </Button>
+        </div>
       </form>
     </Form>
   );
