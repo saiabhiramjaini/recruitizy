@@ -42,6 +42,7 @@ jobs:
             sudo docker stop recruitizy-flask-server || true
             sudo docker rm recruitizy-flask-server || true
             sudo docker run -d -p 5000:5000 \
-              -e PORT=${{ secrets.ENV_PORT }} \
               -e DATABASE_URL=${{ secrets.ENV_DATABASE_URL }} \
+              -e GEMINI_API_KEY=${{ secrets.ENV_GEMINI_API_KEY }} \
+              -e TOGETHER_AI_API_KEY=${{ secrets.ENV_TOGETHER_AI_API_KEY }} \
               --name recruitizy-flask-server saiabhiramjaini/recruitizy-flask-server:latest
