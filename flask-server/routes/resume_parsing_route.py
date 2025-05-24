@@ -8,7 +8,7 @@ def parse_resume_route(app):
     def parse_route():
         """
         Endpoint to parse resume/cv.
-        """
+        """ 
 
         data = request.get_json()
 
