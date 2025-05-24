@@ -1,0 +1,306 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id       Int    @id @default(autoincrement())
+  username String
+  email    String @unique
+  password String
+
+  // Relationships
+  company   Company? @relation(name: "AdminToCompany", fields: [companyId], references: [id])
+  companyId Int?     @unique // One admin can create only one company
+
+  hrs Hr[] // Admin can create multiple HRs
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Hr {
+  id       Int    @id @default(autoincrement())
+  username String
+  email    String @unique
+  password String
+
+  // Relationships
+  admin     Admin   @relation(fields: [adminId], references: [id])
+  adminId   Int
+  company   Company @relation(fields: [companyId], references: [id])
+  companyId Int
+
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  Job       Job[]
+  Candidate Candidate[]
+}
+
+model Company {
+  id           Int      @id @default(autoincrement())
+  name         String   @unique
+  about        String
+  companySize  Int
+  locations    String[]
+  headquarters String
+  foundedYear  Int
+
+  coreTechnologies CoreTechnology[]
+  industry         Industry
+
+  website   String?
+  linkedIn  String?
+  twitter   String?
+  facebook  String?
+  instagram String?
+
+  contactEmail String?
+  contactPhone String?
+
+  // Relationships
+  admin Admin? @relation(name: "AdminToCompany")
+  hrs   Hr[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Job       Job[]
+}
+
+model Job {
+  id                    String         @id @default(uuid())
+  title                 String
+  description           String
+  role                  String
+  responsibilities      String
+  interviewRounds       Int?
+  interviewProcess      String?
+  shortlistedCandidates Int?
+  numberOfPositions     Int?
+  location              String
+  type                  JobType
+  experience            String
+  education             EducationLevel
+  status                JobStatus
+  skills                Skill[]
+  remote                Boolean        @default(false)
+  deadline              DateTime?
+
+  threshold Int // e.g., 3 for 3 rounds of interviews
+  jdSummary String? // Short summary of the job description
+
+  // Relationships
+  company    Company     @relation(fields: [companyId], references: [id])
+  companyId  Int
+  hr         Hr?         @relation(fields: [hrId], references: [id])
+  hrId       Int?
+  candidates Candidate[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Candidate {
+  id             String   @id @default(uuid())
+  firstName      String
+  lastName       String
+  email          String
+  phone          String?
+  resume         String
+  coverLetter    String?
+  experience     Json[]
+  education      Json[]
+  projects       Json[]
+  certifications String[]
+  achievements   String[]
+  portfolio      String?
+  linkedIn       String?
+  github         String?
+  status         String
+
+  aiMailResponse Json?
+  aiAnalysis     Json?
+
+  // Skills
+  skills Skill[]
+
+  // Relationships
+  job   Job?    @relation(fields: [jobId], references: [id])
+  jobId String?
+  hr    Hr?     @relation(fields: [hrId], references: [id])
+  hrId  Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Industry {
+  Technology
+  Finance_Banking
+  Healthcare_Biotech
+  Manufacturing_Automotive
+  Retail_Consumer_Goods
+  Energy_Utilities
+  Media_Entertainment
+  Telecommunications
+  Transportation_Logistics
+  Real_Estate_Construction
+  Education
+  Government_Public_Sector
+  Non_Profit_Social_Impact
+  Other
+}
+
+enum CoreTechnology {
+  Artificial_Intelligence
+  Machine_Learning
+  Blockchain
+  Cloud_Computing
+  Cybersecurity
+  Data_Science
+  Internet_of_Things_IoT
+  Augmented_Reality_AR
+  Virtual_Reality_VR
+  Mobile_Development
+  Web_Development
+  DevOps
+  Software_Development
+  Testing_Quality_Assurance
+}
+
+enum Skill {
+  JavaScript_TypeScript
+  Python
+  Java
+  CSharp
+  C_CPlusPlus
+  Go_Golang
+  Rust
+  Kotlin
+  Swift
+  PHP
+  Ruby
+  Scala
+  Dart
+  R
+  Elixir
+  Perl
+  Frontend_Development
+  ReactJS
+  Angular
+  VueJS
+  Svelte
+  NextJS
+  NuxtJS
+  HTML_CSS
+  Tailwind_CSS
+  Bootstrap
+  WebAssembly
+  Backend_Development
+  NodeJS
+  ExpressJS
+  Django
+  Flask
+  FastAPI
+  Spring_Boot
+  Laravel
+  Ruby_on_Rails
+  ASP_NET
+  NestJS
+  GraphQL
+  REST_APIs
+  React_Native
+  Flutter
+  Swift_iOS
+  Kotlin_Android
+  Xamarin
+  Ionic
+  PostgreSQL
+  MySQL
+  MongoDB
+  Firebase
+  SQLite
+  Microsoft_SQL_Server
+  Oracle_DB
+  Cassandra
+  Redis
+  DynamoDB
+  Neo4j_Graph_DB
+  AWS_Amazon_Web_Services
+  Azure
+  Google_Cloud_GCP
+  Docker
+  Kubernetes
+  Terraform
+  Ansible
+  Jenkins
+  GitHub_Actions
+  CI_CD_Pipelines
+  Serverless_AWS_Lambda_Azure_Functions
+  AI_ML_Data_Science
+  TensorFlow
+  PyTorch
+  Scikit_learn
+  Keras
+  OpenAI_GPT
+  LangChain
+  Hugging_Face
+  Pandas
+  NumPy
+  Apache_Spark
+  Hadoop
+  Blockchain_Web3
+  Solidity
+  Ethereum
+  Polygon
+  Solana
+  Hyperledger
+  Web3JS_EthersJS
+  Cybersecurity_General
+  Penetration_Testing
+  Ethical_Hacking
+  SIEM_Tools_Splunk_Wazuh
+  Cryptography
+  Zero_Trust_Security
+  Game_Development
+  Unity
+  Unreal_Engine
+  Godot
+  Phaser
+  Others
+  IoT_Internet_of_Things
+  AR_VR_Augmented_Virtual_Reality
+  Embedded_Systems
+  Robotics
+  Quantum_Computing
+}
+
+enum JobType {
+  Full_time
+  Part_time
+  Contract
+  Internship
+}
+
+enum EducationLevel {
+  High_School_Diploma
+  Associates_Degree
+  Bachelors_Degree
+  Masters_Degree
+  PhD
+  Other
+}
+
+enum JobStatus {
+  Open
+  Closed
+  On_Hold
+  Cancelled
+}

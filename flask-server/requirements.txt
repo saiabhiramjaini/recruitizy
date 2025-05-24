@@ -1,0 +1,21 @@
+# Flask & Backend Dependencies
+flask
+flask-cors
+flask-sqlalchemy
+
+# AI & LLM Integration
+google-generativeai  # Gemini API
+together  # Together AI API
+
+# Text Processing
+pypdf  # Extract text from PDFs
+python-docx  # Extract text from Word documents
+
+# Environment Variables & Logging
+python-dotenv  # Manage API keys & environment variables
+
+# Deployment & Misc
+requests  # Handling API calls
+
+# Database
+psycopg2-binary
