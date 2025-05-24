@@ -129,7 +129,7 @@ model Candidate {
   aiAnalysis     Json?
 
   // Skills
-  skills Skill[]
+  skills String[]
 
   // Relationships
   job   Job?    @relation(fields: [jobId], references: [id])

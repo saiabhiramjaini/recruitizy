@@ -22,11 +22,6 @@ const routes = [
     icon: Users,
     href: "/hr/candidates",
   },
-  {
-    label: "Settings",
-    icon: Settings,
-    href: "/hr/settings",
-  },
 ];
 
 export function HrSidebar() {

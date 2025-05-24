@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
 import { sendEmail } from '../utils/email';
+import { AuthenticatedHRRequest } from '../utils/types';
 
 const prisma = new PrismaClient();
 
@@ -15,9 +16,18 @@ type AIMailResponse = {
 // Zod schema for request validation
 const hrIdSchema = z.string().min(1, "HR ID is required");
 
-export const getAllHrJobs = async (req: Request, res: Response) => {
+export const getAllHrJobs = async (req: AuthenticatedHRRequest, res: Response) => {
     try {
-        const { hrId } = req.params;
+        const {hr} = req;
+
+        // Validate HR ID
+        if(!hr || !hr.id) {
+            return res.status(400).json({
+                success: false,
+                message: "HR ID is required"
+            });
+        }
+        const hrId = hr.id.toString();
 
         // Validate HR ID
         const validationResult = hrIdSchema.safeParse(hrId);
@@ -212,6 +222,135 @@ HR Team at ${getCompany.name}`;
 
     } catch (error) {
         console.error("Error fetching HR jobs:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error instanceof Error ? error.message : "Unknown error"
+        });
+    }
+}
+
+
+export const getStats = async (req: AuthenticatedHRRequest, res: Response) => {
+    try {
+        const { hr } = req;
+
+        // Validate HR ID
+        if (!hr || !hr.id) {
+            return res.status(400).json({
+                success: false,
+                message: "HR ID is required"
+            });
+        }
+        const hrId = hr.id.toString();
+
+        // Fetch stats for the HR
+        const stats = await prisma.job.aggregate({
+            where: {
+                hrId: parseInt(hrId),
+            },
+            _count: {
+                id: true
+            },
+            _avg: {
+                threshold: true,
+            },
+            _sum: {
+                numberOfPositions: true,
+            }
+        });
+
+        return res.status(200).json({
+            success: true,
+            data: stats
+        });
+
+    } catch (error) {
+        console.error("Error fetching HR stats:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error instanceof Error ? error.message : "Unknown error"
+        });
+    }
+}
+
+export const getJobStatusDistribution = async (req: AuthenticatedHRRequest, res: Response) => {
+    try {
+        const { hr } = req;
+
+        if (!hr || !hr.id) {
+            return res.status(400).json({
+                success: false,
+                message: "HR ID is required"
+            });
+        }
+        const hrId = hr.id.toString();
+
+        const statusDistribution = await prisma.job.groupBy({
+            by: ['status'],
+            where: {
+                hrId: parseInt(hrId),
+            },
+            _count: {
+                id: true,
+            },
+        });
+
+        const formattedData = statusDistribution.map(item => ({
+            status: item.status,
+            count: item._count.id,
+        }));
+
+        return res.status(200).json({
+            success: true,
+            data: formattedData
+        });
+
+    } catch (error) {
+        console.error("Error fetching job status distribution:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error instanceof Error ? error.message : "Unknown error"
+        });
+    }
+}
+
+export const getCandidateStatusDistribution = async (req: AuthenticatedHRRequest, res: Response) => {
+    try {
+        const { hr } = req;
+
+        if (!hr || !hr.id) {
+            return res.status(400).json({
+                success: false,
+                message: "HR ID is required"
+            });
+        }
+        const hrId = hr.id.toString();
+
+        const statusDistribution = await prisma.candidate.groupBy({
+            by: ['status'],
+            where: {
+                hrId: parseInt(hrId),
+            },
+            _count: {
+                id: true,
+            },
+        });
+
+        const formattedData = statusDistribution.map(item => ({
+            status: item.status,
+            count: item._count.id,
+        }));
+
+        return res.status(200).json({
+            success: true,
+            data: formattedData
+        });
+
+    } catch (error) {
+        console.error("Error fetching candidate status distribution:", error);
         return res.status(500).json({
             success: false,
             message: "Internal server error",
