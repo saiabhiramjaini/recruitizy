@@ -40,8 +40,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             sudo docker pull saiabhiramjaini/recruitizy-server:latest
-            # sudo docker stop recruitizy-server || true
-            # sudo docker rm recruitizy-server || true
+            sudo docker stop recruitizy-server || true
+            sudo docker rm recruitizy-server || true
             sudo docker run -d -p 8080:8080 \
               -e PORT=${{ secrets.ENV_PORT }} \
               -e DATABASE_URL=${{ secrets.ENV_DATABASE_URL }} \

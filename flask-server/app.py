@@ -14,7 +14,7 @@ CORS(app,
      supports_credentials=True,
      allow_headers=["Content-Type", "Authorization"],
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
-
+ 
 # Register routes
 ## Route for summarizing JD
 jd_summarize_route(app)
