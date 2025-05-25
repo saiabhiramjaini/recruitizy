@@ -54,12 +54,37 @@ export function CandidateList({ candidates, onSelect }: CandidateListProps) {
     if (!selectedCandidate || !actionType || reason.trim() === "") return;
 
     try {
-      await axiosInstance.post(`/api/v1/hr/${selectedCandidate.id}`, {
-        hrAccepted: actionType,
+      let endpoint = "";
+      const id = selectedCandidate.id;
+
+      if (
+        selectedCandidate.status === "shortlisted" &&
+        actionType === "shortlisted"
+      ) {
+        // Confirming a shortlisted candidate
+        endpoint = `/api/v1/hr/confirm/${id}`;
+      } else if (
+        selectedCandidate.status === "shortlisted" &&
+        actionType === "rejected"
+      ) {
+        // Overriding from shortlisted to rejected
+        endpoint = `/api/v1/hr/override/reject/${id}`;
+      } else if (
+        selectedCandidate.status === "rejected" &&
+        actionType === "shortlisted"
+      ) {
+        // Overriding from rejected to shortlisted
+        endpoint = `/api/v1/hr/override/shortlist/${id}`;
+      } else {
+        alert("Invalid action. No endpoint to handle this transition.");
+        return;
+      }
+
+      await axiosInstance.post(endpoint, {
         hrReason: reason.trim(),
       });
 
-      // Reset state after submission
+      // Reset state after successful submission
       handleDialogCancel();
     } catch (err) {
       console.error("Failed to submit HR decision", err);
@@ -104,9 +129,11 @@ export function CandidateList({ candidates, onSelect }: CandidateListProps) {
                       if (candidate.status === "rejected") {
                         openDialog(candidate, "shortlisted");
                       } else if (candidate.status === "shortlisted") {
-                        alert("Candidate is already shortlisted.");
+                        alert(
+                          "Shortlisting mail is forwarded to the candidate."
+                        );
                       } else {
-                        alert("Only rejected candidates can be accepted.");
+                        alert("Only shortlisted candidates can be accepted.");
                       }
                     }}
                   >

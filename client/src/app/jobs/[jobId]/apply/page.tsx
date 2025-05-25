@@ -24,6 +24,7 @@ import { applicationSchema } from "@/utils/schema";
 import axios from "@/utils/axios";
 import { config } from "@/utils/config";
 import { useRouter } from "next/navigation";
+import axiosInstance from "@/utils/axios";
 
 type ExperienceItem = NonNullable<
   z.infer<typeof applicationSchema>["experience"]
@@ -35,11 +36,7 @@ type ProjectItem = NonNullable<
   z.infer<typeof applicationSchema>["projects"]
 >[number];
 
-export default function JobApplicationPage({
-  params,
-}: {
-  params: any;
-}) {
+export default function JobApplicationPage({ params }: { params: any }) {
   const router = useRouter();
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
@@ -184,7 +181,9 @@ export default function JobApplicationPage({
         skills: parsedData.skills || [],
       });
 
-      toast.success("Resume parsed successfully. Please review the information.");
+      toast.success(
+        "Resume parsed successfully. Please review the information."
+      );
     } catch (error) {
       console.error("Parsing error:", error);
       toast.error(
@@ -221,6 +220,10 @@ export default function JobApplicationPage({
       );
 
       console.log("AI screening response:", aiResponse.data);
+
+      // const aiResponseEmail = await axiosInstance.post(
+      //   `/api/v1/`
+      // )
 
       // Reset form and redirect or show success message
       form.reset();
