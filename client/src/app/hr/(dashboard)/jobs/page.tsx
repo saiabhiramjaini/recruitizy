@@ -1,8 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { JobForm } from "@/components/hr/JobForm";
+import { Plus } from "lucide-react"; 
 import {
   Dialog,
   DialogContent,
@@ -15,6 +14,7 @@ import { JobCard } from "@/components/hr/JobCard";
 import { JobDetails } from "@/components/hr/JobDetails";
 import { CandidateDetails } from "@/components/hr/CandidateDetails";
 import axios from "@/utils/axios";
+import JobForm from "@/components/hr/JobForm";
 
 interface Job {
   id: string;

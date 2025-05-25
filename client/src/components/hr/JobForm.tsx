@@ -1,355 +1,278 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { MultiSelect } from "@/components/ui/multi-select";
-import { jobTypeOptions, educationLevelOptions, skillOptions } from "@/utils/options";
-import axios from "@/utils/axios";
-import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { createJobSchema, JobCreateInput } from "@/utils/schema";
-import { z } from "zod";
+import axios from '@/utils/axios';
+import { useState } from 'react';
 
 export default function CreateJobForm() {
-  const router = useRouter();
-
-  const form = useForm<JobCreateInput>({
-    resolver: zodResolver(createJobSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      role: "",
-      responsibilities: "",
-      location: "",
-      type: "Full_time",
-      experience: "",
-      education: "Bachelors_Degree",
-      status: "Open",
-      skills: [],
-      remote: false,
-      threshold: 70,
-      deadline: undefined,
-    },
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    role: '',
+    responsibilities: '',
+    location: '',
+    type: 'Full_time',
+    experience: '',
+    education: 'Bachelors_Degree',
+    skills: [] as string[],
+    threshold: 70
   });
 
-  const onSubmit = async (values: JobCreateInput) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const skillOptions = [
+    'JavaScript_TypeScript',
+    'ReactJS',
+    'NodeJS',
+    'Python',
+    'Java',
+    'SQL',
+    'AWS',
+    'Docker',
+    'UI_UX',
+    'GraphQL'
+  ];
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSkillChange = (skill: string) => {
+    setFormData(prev => {
+      if (prev.skills.includes(skill)) {
+        return {
+          ...prev,
+          skills: prev.skills.filter(s => s !== skill)
+        };
+      } else {
+        return {
+          ...prev,
+          skills: [...prev.skills, skill]
+        };
+      }
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrorMessage('');
+    setSuccessMessage('');
+
     try {
-      const payload = {
-        ...values,
-        deadline: values.deadline?.toISOString()
-      };
-      const response = await axios.post("/api/v1/job", payload);
-      
-      toast.success("Job created successfully!");
-      router.push(`/jobs/${response.data.job.id}`);
+      const response = await axios.post('/api/v1/job', formData);
+      setSuccessMessage(response.data.message);
+      // Reset form after successful submission
+      setFormData({
+        title: '',
+        description: '',
+        role: '',
+        responsibilities: '',
+        location: '',
+        type: 'Full_time',
+        experience: '',
+        education: 'Bachelors_Degree',
+        skills: [],
+        threshold: 70
+      });
     } catch (error) {
-      toast.error("Failed to create job");
-      console.error("Job creation error:", error);
+      setErrorMessage('Failed to create job. Please try again.');
+      console.error('Error creating job:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-2xl font-bold mb-6">Create New Job Posting</h1>
       
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Job Title */}
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Job Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Senior Frontend Developer" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      {successMessage && (
+        <div className="mb-4 p-4 bg-green-100 text-green-700 rounded">
+          {successMessage}
+        </div>
+      )}
+      
+      {errorMessage && (
+        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
+          {errorMessage}
+        </div>
+      )}
 
-            {/* Job Description URL */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Job Description URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://example.com/job-description" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Role */}
-          <FormField
-            control={form.control}
-            name="role"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Role</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. Frontend Developer" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Responsibilities */}
-          <FormField
-            control={form.control}
-            name="responsibilities"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Responsibilities</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Describe the key responsibilities of this role..."
-                    className="min-h-[120px]"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Location */}
-            <FormField
-              control={form.control}
-              name="location"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Location</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. New York, NY" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Job Type */}
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Job Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select job type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {jobTypeOptions.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type.replace("_", " ")}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Experience */}
-            <FormField
-              control={form.control}
-              name="experience"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Experience Required</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. 2+ years" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Education Level */}
-            <FormField
-              control={form.control}
-              name="education"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Education Level</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select education level" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {educationLevelOptions.map((level) => (
-                        <SelectItem key={level} value={level}>
-                          {level.replace("_", " ")}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Skills */}
-          <FormField
-            control={form.control}
-            name="skills"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Required Skills</FormLabel>
-                <MultiSelect
-                  selected={field.value}
-                  options={skillOptions.map(skill => ({
-                    value: skill,
-                    label: skill.replace(/_/g, " ")
-                  }))}
-                  onChange={field.onChange}
-                  className="sm:w-[510px]"
+      <form onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Basic Information */}
+          <div className="md:col-span-2">
+            <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Job Title*</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
                 />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Remote */}
-            <FormField
-              control={form.control}
-              name="remote"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Remote Position</FormLabel>
-                    <FormDescription>
-                      Check if this position can be done remotely
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Job Description URL*</label>
+                <input
+                  type="url"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                  placeholder="https://example.com/job-description"
+                />
+              </div>
 
-            {/* Threshold */}
-            <FormField
-              control={form.control}
-              name="threshold"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Matching Threshold (%)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={100}
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Role*</label>
+                <input
+                  type="text"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Responsibilities*</label>
+                <textarea
+                  name="responsibilities"
+                  value={formData.responsibilities}
+                  onChange={handleChange}
+                  required
+                  rows={3}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                />
+              </div>
+            </div>
           </div>
 
-          {/* Deadline */}
-          <FormField
-            control={form.control}
-            name="deadline"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Application Deadline (Optional)</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[240px] pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) => date < new Date()}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Job Details */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Job Details</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Location*</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                />
+              </div>
 
-          <div className="flex justify-end gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">Create Job</Button>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Job Type*</label>
+                <select
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                >
+                  <option value="Full_time">Full Time</option>
+                  <option value="Part_time">Part Time</option>
+                  <option value="Contract">Contract</option>
+                  <option value="Internship">Internship</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Experience*</label>
+                <input
+                  type="text"
+                  name="experience"
+                  value={formData.experience}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                  placeholder="e.g., 2+ years"
+                />
+              </div>
+            </div>
           </div>
-        </form>
-      </Form>
+
+          {/* Requirements */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Requirements</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Education*</label>
+                <select
+                  name="education"
+                  value={formData.education}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                >
+                  <option value="Bachelors_Degree">Bachelor's Degree</option>
+                  <option value="Masters_Degree">Master's Degree</option>
+                  <option value="PhD">PhD</option>
+                  <option value="Diploma">Diploma</option>
+                  <option value="No_degree">No Degree Required</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Required Skills*</label>
+                <div className="mt-2 space-y-2">
+                  {skillOptions.map(skill => (
+                    <div key={skill} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`skill-${skill}`}
+                        checked={formData.skills.includes(skill)}
+                        onChange={() => handleSkillChange(skill)}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <label htmlFor={`skill-${skill}`} className="ml-2 text-sm text-gray-700">
+                        {skill.replace('_', ' ')}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Threshold Score*</label>
+                <input
+                  type="number"
+                  name="threshold"
+                  min="0"
+                  max="100"
+                  value={formData.threshold}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50"
+          >
+            {isSubmitting ? 'Creating Job...' : 'Create Job Posting'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
