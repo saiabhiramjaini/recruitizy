@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   BarChart,
   Bar,
@@ -9,13 +10,23 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
 } from "recharts";
-import axios from "@/utils/axios";
+import { motion } from "framer-motion";
+import {
+  Users,
+  Briefcase,
+  TrendingUp,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Mail,
+  Target,
+  Award,
+} from "lucide-react";
 
 interface StatsData {
   _count: {
@@ -39,7 +50,46 @@ interface CandidateStatusData {
   count: number;
 }
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
+const COLORS = [
+  "hsl(var(--primary))",
+  "hsl(var(--secondary))",
+  "hsl(var(--accent))",
+  "hsl(var(--muted))",
+  "hsl(var(--destructive))",
+];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut",
+    },
+  },
+};
+
+const cardHoverVariants = {
+  hover: {
+    scale: 1.02,
+    transition: {
+      duration: 0.2,
+      ease: "easeInOut",
+    },
+  },
+};
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<StatsData | null>(null);
@@ -50,43 +100,48 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Mock data for demo purposes
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-
-        // Fetch basic stats
-        const statsResponse = await axios.get("/api/v1/hr/stats");
-        setStats(statsResponse.data.data);
-
-        // Fetch job status distribution
-        const jobStatusResponse = await axios.get(
-          "/api/v1/hr/jobs/status-distribution"
-        );
-        setJobStatusData(jobStatusResponse.data.data);
-
-        // Fetch candidate status distribution
-        const candidateStatusResponse = await axios.get(
-          "/api/v1/hr/candidates/status-distribution"
-        );
-        setCandidateStatusData(candidateStatusResponse.data.data);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load dashboard data"
-        );
-        console.error("Dashboard error:", err);
-      } finally {
-        setLoading(false);
-      }
+    const mockStats: StatsData = {
+      _count: { id: 12 },
+      _avg: { threshold: 75.5 },
+      _sum: { numberOfPositions: 45 },
     };
 
-    fetchDashboardData();
+    const mockJobStatus: JobStatusData[] = [
+      { status: "Active", count: 8 },
+      { status: "Draft", count: 3 },
+      { status: "Closed", count: 1 },
+    ];
+
+    const mockCandidateStatus: CandidateStatusData[] = [
+      { status: "Applied", count: 156 },
+      { status: "Shortlisted", count: 42 },
+      { status: "Interviewed", count: 18 },
+      { status: "Rejected", count: 89 },
+      { status: "Hired", count: 7 },
+    ];
+
+    setTimeout(() => {
+      setStats(mockStats);
+      setJobStatusData(mockJobStatus);
+      setCandidateStatusData(mockCandidateStatus);
+      setLoading(false);
+    }, 1000);
   }, []);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[80vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{
+            duration: 1,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "linear",
+          }}
+          className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full"
+        />
       </div>
     );
   }
@@ -94,172 +149,136 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-[80vh]">
-        <p className="text-destructive">{error}</p>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <XCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
+          <p className="text-destructive text-lg">{error}</p>
+        </motion.div>
       </div>
     );
   }
 
+  const totalCandidates = candidateStatusData.reduce(
+    (acc, curr) => acc + curr.count,
+    0
+  );
+  const activeCandidates = candidateStatusData.reduce(
+    (acc, curr) => acc + (curr.status !== "Rejected" ? curr.count : 0),
+    0
+  );
+
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">HR Dashboard</h1>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="space-y-8"
+    >
+      {/* Header */}
+      <motion.div variants={itemVariants} className="space-y-2">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          HR Dashboard
+        </h1>
+        <p className="text-muted-foreground text-lg">
+          Welcome back! Here's what's happening with your recruitment process.
+        </p>
+      </motion.div>
 
       {stats && (
         <>
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Jobs Posted
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{stats._count.id}</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Positions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">
-                  {stats._sum.numberOfPositions || 0}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Avg. Interview Rounds
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">
-                  {stats._avg.threshold
-                    ? stats._avg.threshold.toFixed(1)
-                    : "N/A"}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Active Candidates
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">
-                  {candidateStatusData.reduce(
-                    (acc, curr) =>
-                      acc + (curr.status !== "Rejected" ? curr.count : 0),
-                    0
-                  )}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Charts Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Job Status Distribution */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Job Status Distribution</CardTitle>
-              </CardHeader>
-              <CardContent className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={jobStatusData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="count"
-                      nameKey="status"
-                      label={({ name, percent }) =>
-                        `${name}: ${(percent * 100).toFixed(0)}%`
-                      }
-                    >
-                      {jobStatusData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            {/* Candidate Status Distribution */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Candidate Status Distribution</CardTitle>
-              </CardHeader>
-              <CardContent className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={candidateStatusData}
-                    margin={{
-                      top: 20,
-                      right: 30,
-                      left: 20,
-                      bottom: 5,
-                    }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="status" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="count" fill="#8884d8" name="Candidates" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Recent Activity Section */}
-          <div className="mt-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <p className="font-medium">New candidate applied</p>
-                      <p className="text-sm text-muted-foreground">
-                        John Doe applied for Senior Developer position
-                      </p>
+          {/* Key Metrics */}
+          <motion.div variants={itemVariants}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <motion.div variants={cardHoverVariants} whileHover="hover">
+                <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                      Total Jobs Posted
+                    </CardTitle>
+                    <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-blue-900 dark:text-blue-100">
+                      {stats._count.id}
                     </div>
-                    <p className="text-sm text-muted-foreground">2 hours ago</p>
-                  </div>
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <p className="font-medium">Job published</p>
-                      <p className="text-sm text-muted-foreground">
-                        You published a new job: Product Manager
-                      </p>
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                      +2 from last month
+                    </p>
+                  </CardContent>
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-blue-200 dark:bg-blue-800 rounded-full -mr-10 -mt-10 opacity-20" />
+                </Card>
+              </motion.div>
+
+              <motion.div variants={cardHoverVariants} whileHover="hover">
+                <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
+                      Total Positions
+                    </CardTitle>
+                    <Target className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-green-900 dark:text-green-100">
+                      {stats._sum.numberOfPositions || 0}
                     </div>
-                    <p className="text-sm text-muted-foreground">1 day ago</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      Across all departments
+                    </p>
+                  </CardContent>
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-green-200 dark:bg-green-800 rounded-full -mr-10 -mt-10 opacity-20" />
+                </Card>
+              </motion.div>
+
+              <motion.div variants={cardHoverVariants} whileHover="hover">
+                <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                      Avg. Threshold Score
+                    </CardTitle>
+                    <Award className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-purple-900 dark:text-purple-100">
+                      {stats._avg.threshold
+                        ? stats._avg.threshold.toFixed(1)
+                        : "N/A"}
+                    </div>
+                    <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                      Quality benchmark
+                    </p>
+                  </CardContent>
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-purple-200 dark:bg-purple-800 rounded-full -mr-10 -mt-10 opacity-20" />
+                </Card>
+              </motion.div>
+
+              <motion.div variants={cardHoverVariants} whileHover="hover">
+                <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-orange-700 dark:text-orange-300">
+                      Active Candidates
+                    </CardTitle>
+                    <Users className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-orange-900 dark:text-orange-100">
+                      {activeCandidates}
+                    </div>
+                    <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                      {((activeCandidates / totalCandidates) * 100).toFixed(1)}%
+                      of total
+                    </p>
+                  </CardContent>
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-orange-200 dark:bg-orange-800 rounded-full -mr-10 -mt-10 opacity-20" />
+                </Card>
+              </motion.div>
+            </div>
+          </motion.div>
+
         </>
       )}
-    </div>
+    </motion.div>
   );
 }

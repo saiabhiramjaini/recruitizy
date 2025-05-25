@@ -18,16 +18,16 @@ const routes = [
     icon: Briefcase,
     href: "/hr/jobs",
   },
-  {
-    label: "Candidates",
-    icon: Users,
-    href: "/hr/candidates",
-  },
-  {
-    label: "Settings",
-    icon: Settings,
-    href: "/hr/settings",
-  },
+  // {
+  //   label: "Candidates",
+  //   icon: Users,
+  //   href: "/hr/candidates",
+  // },
+  // {
+  //   label: "Settings",
+  //   icon: Settings,
+  //   href: "/hr/settings",
+  // },
 ];
 
 const sidebarVariants = {
