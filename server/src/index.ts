@@ -27,7 +27,7 @@ app.use(
 app.get("/", (req, res) => {
   res.send("Server is up and running 😊!");
 });
- 
+
 // Use the routes
 app.use("/api/v1/auth/admin", adminAuthRouter);
 app.use("/api/v1/auth/hr", hrAuthRouter);
