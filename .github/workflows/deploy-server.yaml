@@ -13,23 +13,23 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: login to Docker Hub
-        uses: docker/login-action@v1
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./server
           file: ./server/Dockerfile
           push: true
           tags: saiabhiramjaini/recruitizy-server:latest
 
-      - name: verify Docker image
+      - name: Verify Docker image
         run: docker pull saiabhiramjaini/recruitizy-server:latest
 
       - name: Deploy to EC2
@@ -43,10 +43,10 @@ jobs:
             docker stop recruitizy-server || true
             docker rm recruitizy-server || true
             docker run -d -p 8080:8080 \
-              -e PORT="${ENV_PORT}" \
-              -e DATABASE_URL="${ENV_DATABASE_URL}" \
-              -e CLIENT_URL="${ENV_CLIENT_URL}" \
-              -e JWT_SECRET="${ENV_JWT_SECRET}" \
-              -e SENDER_EMAIL="${ENV_SENDER_EMAIL}" \
-              -e SENDER_PASS="${ENV_SENDER_PASS}" \
+              -e PORT="${{ secrets.ENV_PORT }}" \
+              -e DATABASE_URL="${{ secrets.ENV_DATABASE_URL }}" \
+              -e CLIENT_URL="${{ secrets.ENV_CLIENT_URL }}" \
+              -e JWT_SECRET="${{ secrets.ENV_JWT_SECRET }}" \
+              -e SENDER_EMAIL="${{ secrets.ENV_SENDER_EMAIL }}" \
+              -e SENDER_PASS="${{ secrets.ENV_SENDER_PASS }}" \
               --name recruitizy-server saiabhiramjaini/recruitizy-server:latest
