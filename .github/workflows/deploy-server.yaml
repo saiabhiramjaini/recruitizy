@@ -44,16 +44,9 @@ jobs:
             docker rm recruitizy-server || true
             docker run -d -p 8080:8080 \
               -e PORT="${ENV_PORT}" \
-            -e DATABASE_URL="${ENV_DATABASE_URL}" \
-            -e CLIENT_URL="${ENV_CLIENT_URL}" \
-            -e JWT_SECRET="${ENV_JWT_SECRET}" \
-            -e SENDER_EMAIL="${ENV_SENDER_EMAIL}" \
-            -e SENDER_PASS="${ENV_SENDER_PASS}" \
-            --name recruitizy-server saiabhiramjaini/recruitizy-server:latest
-        env:
-          ENV_PORT: ${{ secrets.ENV_PORT }}
-          ENV_DATABASE_URL: ${{ secrets.ENV_DATABASE_URL }}
-          ENV_CLIENT_URL: ${{ secrets.ENV_CLIENT_URL }}
-          ENV_JWT_SECRET: ${{ secrets.ENV_JWT_SECRET }}
-          ENV_SENDER_EMAIL: ${{ secrets.ENV_SENDER_EMAIL }}
-          ENV_SENDER_PASS: ${{ secrets.ENV_SENDER_PASS }}
+              -e DATABASE_URL="${ENV_DATABASE_URL}" \
+              -e CLIENT_URL="${ENV_CLIENT_URL}" \
+              -e JWT_SECRET="${ENV_JWT_SECRET}" \
+              -e SENDER_EMAIL="${ENV_SENDER_EMAIL}" \
+              -e SENDER_PASS="${ENV_SENDER_PASS}" \
+              --name recruitizy-server saiabhiramjaini/recruitizy-server:latest

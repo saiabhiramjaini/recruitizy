@@ -23,7 +23,7 @@ app.use(
     credentials: true,
   }) 
 );
- 
+  
 app.get("/", (req, res) => {
   res.send("Server is up and running 😊!");
 });
