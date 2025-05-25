@@ -38,7 +38,7 @@ type ProjectItem = NonNullable<
 export default function JobApplicationPage({
   params,
 }: {
-  params: { jobId: string };
+  params: any;
 }) {
   const router = useRouter();
   const [uploadProgress, setUploadProgress] = useState(0);
