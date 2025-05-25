@@ -8,7 +8,7 @@ from controllers.candidate_fit_summary_agent import candidate_fit_summary
 from controllers.rejection_feedback_agent import generate_rejection_email, generate_rejection_email_lastphase
 from controllers.selection_feedback_agent import generate_selection_email
 from controllers.final_check_agent import final_check, final_check_score
-
+ 
 def analyzing_candidate_route(app):
     @app.route('/candidate_screening', methods=['POST'])
     def shortlisting_candidate():

@@ -22,8 +22,7 @@ app.use(
     origin: process.env.CLIENT_URL || "http://localhost:3000",
     credentials: true,
   }) 
-);
-
+); 
 app.get("/", (req, res) => {
   res.send("Server is up and running 😊!");
 });
