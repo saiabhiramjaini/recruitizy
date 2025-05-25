@@ -10,7 +10,7 @@ export const signupSchema = z.object({
     message: "Confirmation password must be at least 8 characters long.",
   }),
 }); 
-
+ 
 export const signinSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
   password: z
