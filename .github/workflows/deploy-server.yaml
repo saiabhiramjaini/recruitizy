@@ -38,15 +38,24 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
+          envs: PORT,DATABASE_URL,CLIENT_URL,JWT_SECRET,SENDER_EMAIL,SENDER_PASS
           script: |
             docker pull saiabhiramjaini/recruitizy-server:latest
             docker stop recruitizy-server || true
             docker rm recruitizy-server || true
             docker run -d -p 8080:8080 \
-              -e PORT="${{ secrets.ENV_PORT }}" \
-              -e DATABASE_URL="${{ secrets.ENV_DATABASE_URL }}" \
-              -e CLIENT_URL="${{ secrets.ENV_CLIENT_URL }}" \
-              -e JWT_SECRET="${{ secrets.ENV_JWT_SECRET }}" \
-              -e SENDER_EMAIL="${{ secrets.ENV_SENDER_EMAIL }}" \
-              -e SENDER_PASS="${{ secrets.ENV_SENDER_PASS }}" \
-              --name recruitizy-server saiabhiramjaini/recruitizy-server:latest
+              -e PORT="$PORT" \
+              -e DATABASE_URL="$DATABASE_URL" \
+              -e CLIENT_URL="$CLIENT_URL" \
+              -e JWT_SECRET="$JWT_SECRET" \
+              -e SENDER_EMAIL="$SENDER_EMAIL" \
+              -e SENDER_PASS="$SENDER_PASS" \
+              --name recruitizy-server \
+              saiabhiramjaini/recruitizy-server:latest
+        env:
+          PORT: ${{ secrets.ENV_PORT }}
+          DATABASE_URL: ${{ secrets.ENV_DATABASE_URL }}
+          CLIENT_URL: ${{ secrets.ENV_CLIENT_URL }}
+          JWT_SECRET: ${{ secrets.ENV_JWT_SECRET }}
+          SENDER_EMAIL: ${{ secrets.ENV_SENDER_EMAIL }}
+          SENDER_PASS: ${{ secrets.ENV_SENDER_PASS }}
