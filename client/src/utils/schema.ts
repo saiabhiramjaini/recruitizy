@@ -328,9 +328,9 @@ export const createJobSchema = z.object({
     errorMap: () => ({ message: "Please select a valid education level" })
   }),
 
-  status: z.enum(["Open", "Closed"], {
-    errorMap: () => ({ message: "Status must be either Open or Closed" })
-  }).default("Open"),
+status: z.enum(["Open", "Closed"], {
+  errorMap: () => ({ message: "Status must be either Open or Closed" })
+}).default("Open"),
 
   skills: z.array(z.enum(SkillValues, {
     errorMap: () => ({ message: "Please select valid skills" })
@@ -339,9 +339,7 @@ export const createJobSchema = z.object({
   remote: z.boolean()
     .default(false),
 
-deadline: z.date()
-  .optional()
-  .transform((date) => date?.toISOString()),
+deadline: z.date().optional(),
 
   threshold: z.number()
     .int({ message: "Threshold must be an integer" })
